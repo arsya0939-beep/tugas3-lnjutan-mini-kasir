@@ -1,5 +1,5 @@
 
-name: Build C++ Windows EXE
+name: Build C++ EXE
 
 on:
   workflow_dispatch:
@@ -12,18 +12,24 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout Source
         uses: actions/checkout@v4
 
-      - name: Setup MSVC
-        uses: ilammy/msvc-dev-cmd@v1
-
-      - name: Compile C++ to EXE
+      - name: Compile C++ (64-bit)
+        shell: cmd
         run: |
-          cl /EHsc /std:c++17 /O2 src/main.cpp /Fe:main.exe
+          g++ --version
+          g++ -std=c++17 -O2 -static -static-libgcc -static-libstdc++ main.cpp -o MyProgram.exe
+
+      - name: Verify EXE
+        shell: cmd
+        run: |
+          if not exist MyProgram.exe exit /b 1
+          dir MyProgram.exe
 
       - name: Upload EXE
         uses: actions/upload-artifact@v4
         with:
-          name: Windows-EXE
-          path: main.exe
+          name: MyProgram-Windows-x64
+          path: MyProgram.exe
+          if-no-files-found: error
